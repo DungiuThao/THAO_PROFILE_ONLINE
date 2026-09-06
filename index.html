@@ -182,6 +182,13 @@
      1) Firebase: tạo project mới -> Realtime Database -> lấy config.
      2) Cloudinary: tạo cloud mới -> tạo Upload Preset unsigned.
      3) Dán các giá trị của TÀI KHOẢN MỚI vào đây.
+
+     ⚠️ LƯU Ý BẢO MẬT: Mật khẩu admin dưới đây nằm trong mã nguồn
+     phía trình duyệt (client-side), nên bất kỳ ai xem "View Source"
+     đều có thể đọc được nó. Đây chỉ nên dùng như một rào chắn nhẹ,
+     không phải bảo mật thật sự. Để bảo vệ đúng cách, nên chuyển sang
+     Firebase Authentication + Firebase Security Rules để giới hạn
+     quyền ghi/xóa dữ liệu ở phía máy chủ.
      ================================================================ */
   const ADMIN_PASSWORD = 'phuongthao080702';
 
@@ -190,22 +197,25 @@
   const VIDEO_UPLOAD_PRESET = 'phuongThao_videos';
 
   const firebaseConfig = {
-  apiKey: "AIzaSyAuYGjlN2SIzk0xrl5EuxTRMDgScsK1hcA",
-  authDomain: "appstudio-2c7f8.firebaseapp.com",
-  databaseURL: "https://appstudio-2c7f8-default-rtdb.firebaseio.com",
-  projectId: "appstudio-2c7f8",
-  storageBucket: "appstudio-2c7f8.firebasestorage.app",
-  messagingSenderId: "168990891846",
-  appId: "1:168990891846:web:dae90f4f697279f9c80f47",
-  measurementId: "G-XSN3JB397H"
-};
+    apiKey: "AIzaSyAuYGjlN2SIzk0xrl5EuxTRMDgScsK1hcA",
+    authDomain: "appstudio-2c7f8.firebaseapp.com",
+    databaseURL: "https://appstudio-2c7f8-default-rtdb.firebaseio.com",
+    projectId: "appstudio-2c7f8",
+    storageBucket: "appstudio-2c7f8.firebasestorage.app",
+    messagingSenderId: "168990891846",
+    appId: "1:168990891846:web:dae90f4f697279f9c80f47",
+    measurementId: "G-XSN3JB397H"
+  };
 
   const CLOUDINARY_IMAGE_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
   const CLOUDINARY_VIDEO_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
   const CLOUDINARY_IMAGE_DELIVERY = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto,w_1000/`;
   const CLOUDINARY_VIDEO_DELIVERY = `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/f_auto,q_auto/`;
 
-  const app = initializeApp(FIREBASE_CONFIG);
+  // FIX: biến cấu hình là "firebaseConfig" (chữ thường), trước đây gọi
+  // nhầm thành "FIREBASE_CONFIG" (không tồn tại) khiến toàn bộ script lỗi
+  // và cả trang (gallery, đăng nhập, upload...) không hoạt động.
+  const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   const mediaRef = ref(db, 'media');
 
@@ -321,8 +331,11 @@
       const realIndex=media.indexOf(item), key=mediaKeys[realIndex];
       const el=document.createElement('div');el.className='gallery-item';
       if(item.type==='video'){
+        // FIX: dùng URL tối ưu từ Cloudinary (f_auto,q_auto) thay vì URL gốc,
+        // đồng nhất với cách ảnh đang được xử lý bên dưới.
+        const videoSrc=item.publicId?`${CLOUDINARY_VIDEO_DELIVERY}${item.publicId}.${item.format||'mp4'}`:item.url;
         el.innerHTML=`
-          <video src="${item.url}" muted playsinline preload="metadata"></video>
+          <video src="${videoSrc}" muted playsinline preload="metadata"></video>
           <span class="media-tag">VIDEO</span>
           <span class="play-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
           <div class="overlay"></div>

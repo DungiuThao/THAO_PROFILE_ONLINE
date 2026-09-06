@@ -183,21 +183,22 @@
      2) Cloudinary: tạo cloud mới -> tạo Upload Preset unsigned.
      3) Dán các giá trị của TÀI KHOẢN MỚI vào đây.
      ================================================================ */
-  const ADMIN_PASSWORD = 'THAY_MAT_KHAU_MOI';
+  const ADMIN_PASSWORD = 'phuongthao080702';
 
   const CLOUD_NAME = 'THAY_CLOUD_NAME_MOI';
   const IMAGE_UPLOAD_PRESET = 'photobooth_images';
   const VIDEO_UPLOAD_PRESET = 'photobooth_videos';
 
-  const FIREBASE_CONFIG = {
-    apiKey: 'THAY_FIREBASE_API_KEY',
-    authDomain: 'THAY_PROJECT.firebaseapp.com',
-    databaseURL: 'https://THAY_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app',
-    projectId: 'THAY_PROJECT',
-    storageBucket: 'THAY_PROJECT.firebasestorage.app',
-    messagingSenderId: 'THAY_MESSAGING_SENDER_ID',
-    appId: 'THAY_APP_ID'
-  };
+  const firebaseConfig = {
+  apiKey: "AIzaSyAuYGjlN2SIzk0xrl5EuxTRMDgScsK1hcA",
+  authDomain: "appstudio-2c7f8.firebaseapp.com",
+  databaseURL: "https://appstudio-2c7f8-default-rtdb.firebaseio.com",
+  projectId: "appstudio-2c7f8",
+  storageBucket: "appstudio-2c7f8.firebasestorage.app",
+  messagingSenderId: "168990891846",
+  appId: "1:168990891846:web:dae90f4f697279f9c80f47",
+  measurementId: "G-XSN3JB397H"
+};
 
   const CLOUDINARY_IMAGE_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
   const CLOUDINARY_VIDEO_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;

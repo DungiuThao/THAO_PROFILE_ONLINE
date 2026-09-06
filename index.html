@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PHOTOBOOTH · Trung Dũng & Phương Thảo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#fff;
+      --bg2:#faf9f7;
+      --bg3:#f2f0ec;
+      --panel:#fff;
+      --border:#dedbd5;
+      --gold:#a4834d;
+      --gold-light:#d8c29a;
+      --text:#262522;
+      --muted:#77736b;
+      --danger:#b34b4b;
+      --radius:14px;
+      --shadow:0 12px 45px rgba(38,37,34,.10);
+      --transition:cubic-bezier(.4,0,.2,1);
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.16;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.025'/%3E%3C/svg%3E")}
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:#c8c4bc;border-radius:5px}
+    header{text-align:center;padding:72px 24px 42px;animation:fadeUp .8s var(--transition) both}
+    .header-line{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:17px}
+    .header-line::before,.header-line::after{content:'';flex:1;max-width:110px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+    .header-line::after{background:linear-gradient(90deg,var(--gold),transparent)}
+    .header-ornament{width:6px;height:6px;background:var(--gold);border-radius:50%}
+    h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,8vw,6rem);font-weight:300;letter-spacing:.04em;line-height:1.05}
+    h1 span{color:var(--gold);font-style:italic}
+    .subtitle{font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin-top:16px}
+    .admin-bar{display:flex;justify-content:flex-end;max-width:1400px;margin:0 auto;padding:0 32px 22px}
+    .admin-btn,.settings-btn{display:inline-flex;align-items:center;gap:8px;padding:9px 20px;background:#fff;border:1px solid var(--border);color:var(--muted);font:500 .72rem 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;border-radius:100px;cursor:pointer;transition:.25s}
+    .admin-btn:hover,.admin-btn.active,.settings-btn:hover{border-color:var(--gold);color:var(--gold);background:var(--bg2)}
+    .admin-btn svg,.settings-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+    .modal-overlay{position:fixed;inset:0;z-index:7000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(35,34,31,.48);backdrop-filter:blur(10px)}
+    .modal-box{position:relative;z-index:1;background:#fff;border:1px solid var(--border);border-radius:20px;padding:42px 34px;width:100%;max-width:480px;box-shadow:var(--shadow);transform:translateY(18px) scale(.98);transition:transform .3s}
+    .modal-overlay.open .modal-box{transform:none}
+    .modal-box h3{font:400 2rem 'Cormorant Garamond',serif;margin-bottom:8px}
+    .modal-box p{font-size:.78rem;color:var(--muted);letter-spacing:.05em;margin-bottom:22px;line-height:1.6}
+    .modal-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font:300 .9rem 'DM Sans',sans-serif;outline:none;margin-bottom:14px}
+    .modal-input:focus{border-color:var(--gold)}
+    .modal-submit{width:100%;padding:13px;background:var(--text);border:1px solid var(--text);color:#fff;font:500 .78rem 'DM Sans',sans-serif;letter-spacing:.15em;text-transform:uppercase;border-radius:100px;cursor:pointer}
+    .modal-submit:hover{background:var(--gold);border-color:var(--gold)}
+    .modal-error{font-size:.76rem;color:var(--danger);min-height:18px;margin-top:10px}
+    .settings-grid{display:grid;gap:12px;text-align:left;margin:18px 0}
+    .settings-card{border:1px solid var(--border);border-radius:12px;padding:15px;background:var(--bg2)}
+    .settings-card strong{display:block;font-size:.78rem;margin-bottom:4px}
+    .settings-card code{font-size:.72rem;color:var(--muted);word-break:break-all}
+    .upload-section{max-width:760px;margin:0 auto 64px;padding:0 24px;animation:fadeUp .8s .12s var(--transition) both}
+    .upload-section.hidden{display:none}
+    .admin-badge{display:inline-flex;align-items:center;gap:6px;background:#f6f1e7;border:1px solid #e2d5bb;color:var(--gold);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:100px;margin-bottom:18px}
+    .admin-badge svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+    .drop-zone{border:1.5px dashed #cfcac1;border-radius:20px;padding:42px 28px;text-align:center;cursor:pointer;position:relative;background:var(--bg2);transition:.3s;overflow:hidden}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--gold);background:#fff;transform:translateY(-2px);box-shadow:0 10px 35px rgba(38,37,34,.07)}
+    .camera-icon{width:54px;height:54px;margin:0 auto 16px}.camera-icon svg{width:100%;height:100%;stroke:var(--gold);stroke-width:1.25;fill:none}
+    .drop-zone h3{font:400 1.55rem 'Cormorant Garamond',serif;margin-bottom:7px}
+    .drop-zone p{font-size:.79rem;color:var(--muted);line-height:1.7;margin-bottom:22px}
+    .upload-btn{display:inline-flex;align-items:center;gap:9px;padding:12px 30px;background:#fff;border:1px solid var(--gold);color:var(--gold);font:500 .76rem 'DM Sans',sans-serif;letter-spacing:.15em;text-transform:uppercase;border-radius:100px;cursor:pointer}
+    .upload-btn:hover{background:var(--gold);color:#fff}
+    #fileInput{display:none}
+    .progress-wrap{margin-top:22px;display:none}.progress-wrap.visible{display:block}
+    .progress-label{font-size:.74rem;color:var(--muted);margin-bottom:7px!important}
+    .progress-bar{height:3px;background:#e6e2db;border-radius:3px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));width:0%;transition:width .25s}
+    .gallery-header{max-width:1400px;margin:0 auto;padding:0 32px 26px;display:flex;align-items:center;gap:15px;animation:fadeUp .8s .2s var(--transition) both}
+    .gallery-header h2{font:400 1.15rem 'Cormorant Garamond',serif;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+    .count-badge,.filter-btn{background:var(--bg2);border:1px solid var(--border);color:var(--gold);font-size:.68rem;letter-spacing:.1em;padding:4px 10px;border-radius:100px}
+    .filter-btn{cursor:pointer;color:var(--muted)}.filter-btn.active{color:var(--gold);border-color:var(--gold)}
+    .separator{flex:1;height:1px;background:var(--border)}
+    .gallery{max-width:1400px;margin:0 auto;padding:0 24px 90px;columns:4;column-gap:15px}
+    @media(max-width:1200px){.gallery{columns:3}}@media(max-width:768px){.gallery{columns:2;column-gap:9px}.gallery-header{padding:0 18px 22px}.admin-bar{padding:0 18px 20px}}@media(max-width:480px){.gallery{columns:1}}
+    .gallery-item{break-inside:avoid;margin-bottom:15px;position:relative;border-radius:var(--radius);overflow:hidden;cursor:pointer;background:var(--bg3);opacity:0;transform:scale(.97) translateY(12px);transition:.55s var(--transition)}
+    .gallery-item.visible{opacity:1;transform:none}
+    .gallery-item img,.gallery-item video{display:block;width:100%;height:auto;transition:transform .5s,filter .5s}
+    .gallery-item:hover img,.gallery-item:hover video{transform:scale(1.035);filter:brightness(1.025)}
+    .media-tag{position:absolute;top:10px;left:10px;z-index:3;background:rgba(255,255,255,.92);border:1px solid rgba(164,131,77,.35);color:var(--gold);font-size:.63rem;letter-spacing:.12em;padding:5px 9px;border-radius:100px}
+    .play-badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(0,0,0,.14);pointer-events:none}
+    .play-badge svg{width:19px;height:19px;fill:var(--gold);margin-left:3px}
+    .gallery-item .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.22),transparent 50%);opacity:0;transition:.35s;pointer-events:none}
+    .gallery-item:hover .overlay{opacity:1}
+    .delete-btn{position:absolute;top:10px;right:10px;width:32px;height:32px;background:rgba(255,255,255,.92);border:1px solid #ddd;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.85);transition:.25s;z-index:10}
+    .gallery-item:hover .delete-btn{opacity:1;transform:none}.delete-btn:hover{background:#fff0f0;border-color:#e5b1b1}.delete-btn svg{width:13px;height:13px;stroke:var(--danger);fill:none;stroke-width:2}
+    .empty-state{text-align:center;padding:75px 24px;color:var(--muted);font:italic 1.2rem 'Cormorant Garamond',serif}
+    .lightbox{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:.3s}
+    .lightbox.open{opacity:1;pointer-events:all}.lb-backdrop{position:absolute;inset:0;background:rgba(20,20,18,.92);backdrop-filter:blur(8px)}
+    .lb-content{position:relative;z-index:1;max-width:min(92vw,1250px);max-height:90vh;display:flex;align-items:center;justify-content:center}
+    .lb-content img,.lb-content video{display:block;max-width:100%;max-height:86vh;object-fit:contain;border-radius:10px;box-shadow:0 25px 80px rgba(0,0,0,.45)}
+    .lb-close{position:absolute;top:-48px;right:0;width:36px;height:36px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:transparent;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}.lb-close svg{width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2}
+    .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border:1px solid rgba(255,255,255,.3);border-radius:50%;background:rgba(0,0,0,.3);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}.lb-nav svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:1.8}.lb-prev{left:-62px}.lb-next{right:-62px}
+    @media(max-width:768px){.lb-prev{left:7px}.lb-next{right:7px}.lb-close{top:-44px}}
+    .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);background:#fff;border:1px solid var(--border);color:var(--text);font-size:.78rem;padding:11px 23px;border-radius:100px;box-shadow:var(--shadow);transition:.35s;opacity:0;z-index:9000;white-space:nowrap}.toast.show{transform:translateX(-50%) translateY(0);opacity:1}.toast.success{border-color:#d8c29a;color:var(--gold)}.toast.error{border-color:#e2b0b0;color:var(--danger)}
+    footer{text-align:center;padding:35px 24px;border-top:1px solid var(--border);color:var(--muted);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-line"><div class="header-ornament"></div></div>
+  <h1>PHOTOBOOTH</h1>
+  <p class="subtitle">Trung Dũng ❤ Phương Thảo</p>
+</header>
+
+<div class="admin-bar">
+  <button class="admin-btn" id="adminToggle">
+    <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    Quản trị
+  </button>
+</div>
+
+<section class="upload-section hidden" id="uploadSection">
+  <div style="text-align:center;margin-bottom:18px"><span class="admin-badge"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Chế độ quản trị</span></div>
+  <div class="drop-zone" id="dropZone">
+    <div class="camera-icon">
+      <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    </div>
+    <h3>Thả ảnh hoặc video vào đây</h3>
+    <p>Hoặc chọn từ thiết bị của bạn<br>Ảnh: JPG · PNG · WEBP · HEIC &nbsp; | &nbsp; Video: MP4 · MOV · WEBM</p>
+    <button class="upload-btn" id="chooseBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Chọn ảnh / video
+    </button>
+    <input type="file" id="fileInput" accept="image/*,video/mp4,video/webm,video/quicktime" multiple>
+    <div class="progress-wrap" id="progressWrap">
+      <p class="progress-label" id="progressLabel">Đang tải lên…</p>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="gallery-header">
+  <h2>Triển Lãm</h2>
+  <span class="count-badge" id="countBadge">0 mục</span>
+  <button class="filter-btn active" data-filter="all">Tất cả</button>
+  <button class="filter-btn" data-filter="image">Ảnh</button>
+  <button class="filter-btn" data-filter="video">Video</button>
+  <div class="separator"></div>
+</div>
+
+<main class="gallery" id="gallery"></main>
+
+<div class="lightbox" id="lightbox">
+  <div class="lb-backdrop" id="lbBackdrop"></div>
+  <div class="lb-content" id="lbContent">
+    <button class="lb-close" id="lbClose"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button class="lb-nav lb-prev" id="lbPrev"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+    <button class="lb-nav lb-next" id="lbNext"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+    <img id="lbImg" src="" alt="Ảnh triển lãm" style="display:none">
+    <video id="lbVideo" controls playsinline preload="metadata" style="display:none"></video>
+  </div>
+</div>
+
+<div class="modal-overlay" id="loginModal">
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-box">
+    <h3>Đăng Nhập</h3>
+    <p>Chỉ dành cho quản trị viên</p>
+    <input type="password" class="modal-input" id="pwdInput" placeholder="Mật khẩu…" autocomplete="current-password">
+    <button class="modal-submit" id="loginSubmit">Xác nhận</button>
+    <p class="modal-error" id="loginError"></p>
+  </div>
+</div>
+
+<footer><p>PHOTOBOOTH · Trung Dũng ❤ Phương Thảo</p></footer>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getDatabase, ref, push, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+  /* ================================================================
+     ⚙️ CẤU HÌNH TÀI KHOẢN MỚI
+     ---------------------------------------------------------------
+     1) Firebase: tạo project mới -> Realtime Database -> lấy config.
+     2) Cloudinary: tạo cloud mới -> tạo Upload Preset unsigned.
+     3) Dán các giá trị của TÀI KHOẢN MỚI vào đây.
+     ================================================================ */
+  const ADMIN_PASSWORD = 'THAY_MAT_KHAU_MOI';
+
+  const CLOUD_NAME = 'THAY_CLOUD_NAME_MOI';
+  const IMAGE_UPLOAD_PRESET = 'photobooth_images';
+  const VIDEO_UPLOAD_PRESET = 'photobooth_videos';
+
+  const FIREBASE_CONFIG = {
+    apiKey: 'THAY_FIREBASE_API_KEY',
+    authDomain: 'THAY_PROJECT.firebaseapp.com',
+    databaseURL: 'https://THAY_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app',
+    projectId: 'THAY_PROJECT',
+    storageBucket: 'THAY_PROJECT.firebasestorage.app',
+    messagingSenderId: 'THAY_MESSAGING_SENDER_ID',
+    appId: 'THAY_APP_ID'
+  };
+
+  const CLOUDINARY_IMAGE_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+  const CLOUDINARY_VIDEO_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/video/upload`;
+  const CLOUDINARY_IMAGE_DELIVERY = `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/f_auto,q_auto,w_1000/`;
+  const CLOUDINARY_VIDEO_DELIVERY = `https://res.cloudinary.com/${CLOUD_NAME}/video/upload/f_auto,q_auto/`;
+
+  const app = initializeApp(FIREBASE_CONFIG);
+  const db = getDatabase(app);
+  const mediaRef = ref(db, 'media');
+
+  let media = [];
+  let mediaKeys = [];
+  let lbIndex = 0;
+  let filter = 'all';
+  let uploading = false;
+  let isAdmin = false;
+
+  const $ = id => document.getElementById(id);
+  const gallery=$('gallery'), dropZone=$('dropZone'), fileInput=$('fileInput');
+  const progressWrap=$('progressWrap'), progressFill=$('progressFill'), progressLabel=$('progressLabel');
+  const countBadge=$('countBadge'), uploadSection=$('uploadSection'), adminToggle=$('adminToggle');
+  const loginModal=$('loginModal'), modalBackdrop=$('modalBackdrop'), pwdInput=$('pwdInput');
+  const loginSubmit=$('loginSubmit'), loginError=$('loginError'), lightbox=$('lightbox');
+  const lbImg=$('lbImg'), lbVideo=$('lbVideo'), lbClose=$('lbClose'), lbBackdrop=$('lbBackdrop');
+  const lbPrev=$('lbPrev'), lbNext=$('lbNext'), toastEl=$('toast');
+
+  let toastTimer;
+  function showToast(msg,type='success'){
+    clearTimeout(toastTimer); toastEl.textContent=msg; toastEl.className=`toast ${type} show`;
+    toastTimer=setTimeout(()=>toastEl.classList.remove('show'),3500);
+  }
+
+  adminToggle.addEventListener('click',()=>{
+    if(isAdmin){
+      isAdmin=false; uploadSection.classList.add('hidden'); adminToggle.classList.remove('active');
+      adminToggle.innerHTML=`<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Quản trị`;
+      renderGallery(); showToast('Đã đăng xuất');
+    }else openModal();
+  });
+  function openModal(){loginModal.classList.add('open');pwdInput.value='';loginError.textContent='';setTimeout(()=>pwdInput.focus(),250)}
+  function closeModal(){loginModal.classList.remove('open')}
+  modalBackdrop.addEventListener('click',closeModal);
+  loginSubmit.addEventListener('click',doLogin);
+  pwdInput.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+  function doLogin(){
+    if(pwdInput.value===ADMIN_PASSWORD){
+      isAdmin=true;closeModal();uploadSection.classList.remove('hidden');adminToggle.classList.add('active');
+      adminToggle.innerHTML=`<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Đăng xuất`;
+      renderGallery();showToast('✓ Đăng nhập thành công');
+    }else{loginError.textContent='Mật khẩu không đúng.';pwdInput.value='';pwdInput.focus()}
+  }
+
+  $('chooseBtn').addEventListener('click',e=>{e.stopPropagation();fileInput.click()});
+  dropZone.addEventListener('click',e=>{if(e.target.closest('#chooseBtn'))return;fileInput.click()});
+  dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over')});
+  dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');if(isAdmin)handleFiles(e.dataTransfer.files)});
+  fileInput.addEventListener('change',()=>handleFiles(fileInput.files));
+
+  function getType(file){return file.type.startsWith('video/')?'video':'image'}
+  function isAllowed(file){
+    return file.type.startsWith('image/') || ['video/mp4','video/webm','video/quicktime'].includes(file.type);
+  }
+
+  async function uploadFile(file,index,total){
+    const type=getType(file);
+    const url=type==='video'?CLOUDINARY_VIDEO_URL:CLOUDINARY_IMAGE_URL;
+    const preset=type==='video'?VIDEO_UPLOAD_PRESET:IMAGE_UPLOAD_PRESET;
+    const form=new FormData(); form.append('file',file); form.append('upload_preset',preset);
+    progressLabel.textContent=`Đang tải ${type==='video'?'video':'ảnh'} ${index+1}/${total}…`;
+    return new Promise((resolve,reject)=>{
+      const xhr=new XMLHttpRequest(); xhr.open('POST',url);
+      xhr.upload.onprogress=e=>{
+        if(e.lengthComputable){
+          const base=index/total*100, step=e.loaded/e.total*(100/total);
+          progressFill.style.width=`${base+step}%`;
+        }
+      };
+      xhr.onload=()=>xhr.status===200?resolve(JSON.parse(xhr.responseText)):reject(new Error(`Cloudinary HTTP ${xhr.status}`));
+      xhr.onerror=()=>reject(new Error('Lỗi mạng khi tải lên'));
+      xhr.send(form);
+    });
+  }
+
+  async function handleFiles(files){
+    if(!isAdmin||uploading)return;
+    const valid=Array.from(files).filter(isAllowed);
+    if(!valid.length){showToast('Vui lòng chọn ảnh hoặc video hợp lệ.','error');return}
+    uploading=true;progressWrap.classList.add('visible');progressFill.style.width='0%';
+    let uploaded=0;
+    for(let i=0;i<valid.length;i++){
+      try{
+        const type=getType(valid[i]), data=await uploadFile(valid[i],i,valid.length);
+        await push(mediaRef,{
+          type,
+          publicId:data.public_id,
+          url:data.secure_url,
+          resourceType:data.resource_type || type,
+          format:data.format || '',
+          originalName:valid[i].name,
+          size:valid[i].size,
+          ts:Date.now()
+        });
+        uploaded++;
+      }catch(err){console.error(err);showToast(`Lỗi ${valid[i].name}: ${err.message}`,'error')}
+    }
+    progressFill.style.width='100%';
+    setTimeout(()=>{
+      progressWrap.classList.remove('visible');progressFill.style.width='0%';uploading=false;fileInput.value='';
+      if(uploaded)showToast(`✓ Đã tải lên ${uploaded} mục thành công!`);
+    },600);
+  }
+
+  function filtered(){return filter==='all'?media:media.filter(x=>x.type===filter)}
+  function renderGallery(){
+    const list=filtered(); countBadge.textContent=`${list.length} mục`;
+    if(!list.length){gallery.innerHTML='<p class="empty-state">Chưa có nội dung nào. Hãy là người đầu tiên chia sẻ!</p>';return}
+    const frag=document.createDocumentFragment();
+    [...list].reverse().forEach((item,displayIndex)=>{
+      const realIndex=media.indexOf(item), key=mediaKeys[realIndex];
+      const el=document.createElement('div');el.className='gallery-item';
+      if(item.type==='video'){
+        el.innerHTML=`
+          <video src="${item.url}" muted playsinline preload="metadata"></video>
+          <span class="media-tag">VIDEO</span>
+          <span class="play-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <div class="overlay"></div>
+          ${isAdmin?`<button class="delete-btn" data-key="${key}" title="Xóa video"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>`:''}`;
+      }else{
+        const src=item.publicId?`${CLOUDINARY_IMAGE_DELIVERY}${item.publicId}`:item.url;
+        el.innerHTML=`
+          <img src="${src}" alt="Ảnh ${displayIndex+1}" loading="lazy">
+          <span class="media-tag">ẢNH</span><div class="overlay"></div>
+          ${isAdmin?`<button class="delete-btn" data-key="${key}" title="Xóa ảnh"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>`:''}`;
+      }
+      el.addEventListener('click',()=>openLightbox(realIndex));
+      if(isAdmin)el.querySelector('.delete-btn').addEventListener('click',async e=>{
+        e.stopPropagation();if(!confirm(`Xóa ${item.type==='video'?'video':'ảnh'} này khỏi thư viện?`))return;
+        try{await remove(ref(db,`media/${key}`));showToast('✓ Đã xóa khỏi thư viện')}catch(err){showToast('Lỗi xóa: '+err.message,'error')}
+      });
+      frag.appendChild(el);
+      requestAnimationFrame(()=>setTimeout(()=>el.classList.add('visible'),displayIndex*45));
+    });
+    gallery.innerHTML='';gallery.appendChild(frag);
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');filter=btn.dataset.filter;renderGallery();
+  }));
+
+  function openLightbox(index){
+    if(!media[index])return;lbIndex=index;const item=media[index];
+    lbImg.style.display=item.type==='image'?'block':'none';lbVideo.style.display=item.type==='video'?'block':'none';
+    if(item.type==='image'){lbImg.src=item.url;lbVideo.pause();lbVideo.removeAttribute('src');}
+    else{lbVideo.src=item.url;lbVideo.currentTime=0;}
+    lightbox.classList.add('open');document.body.style.overflow='hidden';
+  }
+  function closeLightbox(){
+    lightbox.classList.remove('open');document.body.style.overflow='';lbVideo.pause();
+    setTimeout(()=>{lbImg.src='';lbVideo.removeAttribute('src')},300);
+  }
+  function navigate(dir){
+    if(!media.length)return;lbIndex=(lbIndex+dir+media.length)%media.length;
+    const item=media[lbIndex];lbImg.style.display=item.type==='image'?'block':'none';lbVideo.style.display=item.type==='video'?'block':'none';
+    if(item.type==='image'){lbImg.src=item.url;lbVideo.pause();lbVideo.removeAttribute('src')}
+    else{lbVideo.src=item.url;lbVideo.currentTime=0}
+  }
+  lbClose.addEventListener('click',closeLightbox);lbBackdrop.addEventListener('click',closeLightbox);
+  lbPrev.addEventListener('click',e=>{e.stopPropagation();navigate(-1)});
+  lbNext.addEventListener('click',e=>{e.stopPropagation();navigate(1)});
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape')closeLightbox();
+    if(!lightbox.classList.contains('open'))return;
+    if(e.key==='ArrowLeft')navigate(-1);if(e.key==='ArrowRight')navigate(1);
+  });
+
+  onValue(mediaRef,snapshot=>{
+    media=[];mediaKeys=[];
+    snapshot.forEach(child=>{mediaKeys.push(child.key);media.push(child.val())});
+    renderGallery();
+  });
+</script>
+</body>
+</html>
